@@ -32,14 +32,11 @@
         name: "{{ vm_name }}"
         state: present
         guest_id: ubuntu64Guest
+        folder: "/"
         hardware:
           memory_mb: "{{ memory_mb }}"
           num_cpus: "{{ cpu_count }}"
           scsi: paravirtual
-        disks:
-          - size_gb: "{{ disk_size_gb }}"
-            type: thin
-            datastore: "{{ datastore_name }}"
         networks:
           - name: "{{ vm_network }}"
             type: vmxnet3
@@ -49,6 +46,10 @@
             state: present
             type: iso
             unit_number: 0
+        disk:
+          - size_gb: "{{ disk_size_gb }}"
+            type: thin
+            datastore: "{{ datastore_name }}"
         customization: {}
       delegate_to: localhost
 
