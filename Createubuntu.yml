@@ -44,9 +44,11 @@
           - name: "{{ vm_network }}"
             type: vmxnet3
         cdrom:
-          - type: iso
-            datastore: "{{ iso_datastore }}"
-            path: "{{ iso_path }}"
+          - controller_type: sata
+            iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
+            state: present
+            type: iso
+            unit_number: 0
         customization: {}
       delegate_to: localhost
 
