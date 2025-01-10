@@ -2,7 +2,7 @@
   hosts: localhost
   gather_facts: false
   vars:
-    # Variables fetched from environment
+    # Variables fetched from the environment
     esxi_host: "{{ lookup('env', 'esxi_host') }}"
     esxi_user: "{{ lookup('env', 'esxi_user') }}"
     esxi_password: "{{ lookup('env', 'esxi_password') }}"
@@ -73,7 +73,6 @@
         password: "{{ new_user_password | password_hash('sha512') }}"
         groups: sudo
         shell: /bin/bash
-      when: ansible_facts['os_family'] == 'Debian'
 
     - name: Create .ssh directory for the new user
       ansible.builtin.file:
