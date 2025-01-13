@@ -21,7 +21,7 @@
           memory_mb: "4000"
           num_cpus: "2"
         networks:
-          - name: "vm-network"
+          - name: "VM Network"
             start_connected: true
         cdrom:
           - type: "iso"
