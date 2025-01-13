@@ -50,9 +50,9 @@
             dns_servers: "{{ dns_servers }}"
             start_connected: true
         cdrom:
-          controller_type: sata
-          iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
-          state: present
+          - controller_type: sata
+            iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
+            state: present
         customization: {}
       delegate_to: localhost
 
