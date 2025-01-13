@@ -17,7 +17,6 @@
     new_user: "{{ lookup('env', 'new_user') }}"
     new_user_password: "{{ lookup('env', 'new_user_password') }}"
     ssh_public_key: "{{ lookup('env', 'ssh_public_key') }}"
-    datacenter: "ha-datacenter"
     memory_mb: 2048
     num_cpus: 2
     disk_size_gb: 30
@@ -32,7 +31,6 @@
         name: "{{ vm_name }}"
         state: "present"
         guest_id: "ubuntu64Guest"
-        folder: "/VM"
         hardware:
           memory_mb: "{{ memory_mb }}"
           num_cpus: "{{ num_cpus }}"
