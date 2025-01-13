@@ -37,7 +37,7 @@
           memory_mb: "{{ memory_mb }}"
           num_cpus: "{{ cpu_count }}"
           scsi: paravirtual
-        disks:
+        disk:
           - size_gb: "{{ disk_size_gb }}"
             type: thin
             datastore: "{{ datastore_name }}"
