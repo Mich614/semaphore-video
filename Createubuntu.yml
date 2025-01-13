@@ -49,9 +49,9 @@
             dns_servers: "{{ dns_servers }}"
             start_connected: True
         cdrom:
-          controller_type: sata
-          iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
-          type: iso
+          - controller_type: sata
+            iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
+            type: iso
         customization: {}
       delegate_to: localhost
 
