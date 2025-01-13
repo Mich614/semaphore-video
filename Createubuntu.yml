@@ -1,29 +1,67 @@
-- name: Create a new VM on a given ESXi hostname
-  community.vmware.vmware_guest:
-    hostname: "{{ localhost.localdomain }}"
-    username: "{{ root }}"
-    password: "{{ Datait2024! }}"
-    folder: /Ansible_vm/test_vm/
-    name: Ubuntu_test
-    state: poweredon
-    guest_id: centos64Guest
-    # This is hostname of particular ESXi server on which user wants VM to be deployed
-    esxi_hostname: "{{ localhost.localdomain }}"
-    disk:
-    - size_gb: 20
-      type: thin
-      datastore: DataStore
-    hardware:
-      memory_mb: 2048
-      num_cpus: 1
-      scsi: paravirtual
-    networks:
-    - name: VM Network
-      mac: aa:bb:dd:aa:00:14
-      ip: 192.168.20.99
-      netmask: 255.255.255.0
-      device_type: vmxnet3
-    wait_for_ip_address: true
-    wait_for_ip_address_timeout: 600
-  delegate_to: localhost
-  register: deploy_vm
+- name: Create the VM with Static IP
+  hosts: localhost
+  gather_facts: false
+  vars:
+    esxi_host: "{{ lookup('env', 'esxi_host') }}"
+    esxi_user: "{{ lookup('env', 'esxi_user') }}"
+    esxi_password: "{{ lookup('env', 'esxi_password') }}"
+    datastore_name: "{{ lookup('env', 'datastore_name') }}"
+    iso_path: "ISO/ubuntu-24.04.1-live-server-amd64.iso"  # Update this to match your ISO file path
+    vm_name: "{{ lookup('env', 'vm_name') }}"  # Example: "MyUbuntuVM"
+    vm_network: "vm-network"
+    memory_mb: 4000
+    num_cpus: 2
+    disk_size_gb: 30
+    ip_address: "192.168.20.80"
+    netmask: "255.255.255.0"
+    default_gateway: "192.168.20.1"
+    dns_servers:
+      - "192.168.20.20"
+
+  tasks:
+    - name: Create the VM
+      community.vmware.vmware_guest:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+        folder: "/VM/"
+        name: "{{ vm_name }}"
+        state: present
+        guest_id: "ubuntu64Guest"
+        disk:
+          - size_gb: "{{ disk_size_gb }}"
+            type: thin
+            datastore: "{{ datastore_name }}"
+        hardware:
+          memory_mb: "{{ memory_mb }}"
+          num_cpus: "{{ num_cpus }}"
+        networks:
+          - name: "{{ vm_network }}"
+            type: static
+            ip: "{{ ip_address }}"
+            netmask: "{{ netmask }}"
+            gateway: "{{ default_gateway }}"
+            dns_servers: "{{ dns_servers }}"
+            start_connected: true
+        cdrom:
+          type: iso
+          iso_path: "[{{ datastore_name }}] {{ iso_path }}"
+      delegate_to: localhost
+
+    - name: Power on the VM
+      community.vmware.vmware_guest_powerstate:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+        name: "{{ vm_name }}"
+        state: powered-on
+      delegate_to: localhost
+
+    - name: Wait for the VM to become reachable
+      ansible.builtin.wait_for:
+        host: "{{ ip_address }}"
+        port: 22
+        timeout: 300
+      delegate_to: localhost
