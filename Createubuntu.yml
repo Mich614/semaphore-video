@@ -9,7 +9,7 @@
         username: "root"
         password: "Datait2024!"
         validate_certs: no
-        folder: "/VM/"
+        folder: "/"
         name: "AnsibleDeployedMachine"
         state: "poweredon"
         guest_id: "ubuntu64Guest"
