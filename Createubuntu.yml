@@ -45,7 +45,7 @@
           - name: "{{ vm_network }}"
             type: static
             ip: "{{ ip_address }}"
-            mask: "{{ netmask }}"
+            netmask: "{{ netmask }}"
             gateway: "{{ default_gateway }}"
             dns_servers: "{{ dns_servers }}"
             start_connected: True
