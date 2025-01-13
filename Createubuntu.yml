@@ -53,6 +53,7 @@
           - controller_type: sata
             iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
             state: present
+            unit_number: 0
         customization: {}
       delegate_to: localhost
 
