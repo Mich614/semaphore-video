@@ -44,10 +44,10 @@
         networks:
           - name: "{{ vm_network }}"
             type: static
-            ip: {{ ip_address }}
-            mask: {{ netmask }}
-            gateway: {{ default_gateway }}
-            dns_servers: {{ dns_servers }}
+            ip: "{{ ip_address }}"
+            mask: "{{ netmask }}"
+            gateway: "{{ default_gateway }}"
+            dns_servers: "{{ dns_servers }}"
         cdrom:
           - controller_type: sata
             iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
