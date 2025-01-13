@@ -1,13 +1,15 @@
 - name: Create the VM with Static IP
-  hosts: localhost
+  hosts: esxi
   gather_facts: false
-
+  vars:
+    ansible_python_interpreter: /usr/bin/python3.10
   tasks:
     - name: Create the VM
       community.vmware.vmware_guest:
         hostname: "192.168.20.10"
         username: "root"
         password: "Datait2024!"
+        validate_certs: no
         folder: "/"
         name: "AnsibleDeployedMachine"
         state: "present"
