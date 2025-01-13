@@ -5,7 +5,7 @@
   tasks:
     - name: Create the VM
       community.vmware.vmware_guest:
-        hostname: "localhost.localdomain"
+        hostname: "192.168.20.10"
         username: "root"
         password: "Datait2024!"
         validate_certs: no
@@ -13,7 +13,7 @@
         name: "AnsibleDeployedMachine"
         state: "poweredon"
         guest_id: "ubuntu64Guest"
-        esxi_hostname: "192.168.20.20"
+        esxi_hostname: "192.168.20.10"
         disk:
           - size_gb: "30"
             type: "thin"
