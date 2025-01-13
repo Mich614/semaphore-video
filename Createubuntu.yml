@@ -22,39 +22,39 @@
     ssh_public_key: "{{ lookup('env', 'ssh_public_key') }}"
 
   tasks:
-- name: Create a new VM
-  community.vmware.vmware_guest:
-    hostname: "{{ esxi_host }}"
-    username: "{{ esxi_user }}"
-    password: "{{ esxi_password }}"
-    validate_certs: no
-    name: "{{ vm_name }}"
-    state: present
-    guest_id: ubuntu64Guest
-    folder: "/"
-    hardware:
-      memory_mb: "{{ memory_mb }}"
-      num_cpus: "{{ cpu_count }}"
-      scsi: paravirtual
-    disk:
-      - size_gb: "{{ disk_size_gb }}"
-        type: thin
-        datastore: "{{ datastore_name }}"
-    networks:
-      - name: "{{ vm_network }}"
-        type: static
-        ip: "{{ ip_address }}"
-        netmask: "{{ netmask }}"
-        gateway: "{{ default_gateway }}"
-        dns_servers: "{{ dns_servers }}"
-        start_connected: True
-    cdrom:
-      - controller_type: sata
-        iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
+    - name: Create a new VM
+      community.vmware.vmware_guest:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+        name: "{{ vm_name }}"
         state: present
-        type: iso
-    customization: {}
-  delegate_to: localhost
+        guest_id: ubuntu64Guest
+        folder: "/"
+        hardware:
+          memory_mb: "{{ memory_mb }}"
+          num_cpus: "{{ cpu_count }}"
+          scsi: paravirtual
+        disk:
+          - size_gb: "{{ disk_size_gb }}"
+            type: thin
+            datastore: "{{ datastore_name }}"
+        networks:
+          - name: "{{ vm_network }}"
+            type: static
+            ip: "{{ ip_address }}"
+            netmask: "{{ netmask }}"
+            gateway: "{{ default_gateway }}"
+            dns_servers: "{{ dns_servers }}"
+            start_connected: True
+        cdrom:
+          - controller_type: sata
+            iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
+            state: present
+            type: iso
+        customization: {}
+      delegate_to: localhost
 
     - name: Power on the VM
       community.vmware.vmware_guest_powerstate:
