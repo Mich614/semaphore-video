@@ -40,7 +40,7 @@
         disk:
           - size_gb: "{{ disk_size_gb }}"
             type: thin
-            datastore: "{{ datastore_name }}" 
+            datastore: "{{ datastore_name }}"
         networks:
           - name: "{{ vm_network }}"
             type: static
@@ -48,13 +48,11 @@
             netmask: "{{ netmask }}"
             gateway: "{{ default_gateway }}"
             dns_servers: "{{ dns_servers }}"
-            start_connected: True
+            start_connected: true
         cdrom:
-          - controller_type: sata
-            iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
-            state: present
-            type: iso
-            unit_number: 0
+          controller_type: sata
+          iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
+          state: present
         customization: {}
       delegate_to: localhost
 
@@ -65,7 +63,7 @@
         password: "{{ esxi_password }}"
         validate_certs: no
         name: "{{ vm_name }}"
-        state: poweredon
+        state: powered-on
       delegate_to: localhost
 
     - name: Wait for the VM to become reachable
