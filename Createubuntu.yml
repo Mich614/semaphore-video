@@ -40,7 +40,6 @@
         disk:
           - size_gb: "{{ disk_size_gb }}"
             type: thin
-            datastore: "{{ datastore_name }}"
         networks:
           - name: "{{ vm_network }}"
             type: vmxnet3
