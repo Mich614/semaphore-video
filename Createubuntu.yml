@@ -24,5 +24,8 @@
           - name: "VM Network"
             start_connected: true
         cdrom:
+        - controller_number: 0
+          unit_number: 0
+          state: present
           type: iso
           iso_path: "[DataStore] ISO/ubuntu-24.04.1-live-server-amd64.iso"
