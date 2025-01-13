@@ -1,102 +1,29 @@
-- name: Create a new Ubuntu VM from an ISO
+  - name: Create the VM with Static IP
   hosts: localhost
   gather_facts: false
-  vars:
-    esxi_host: "{{ lookup('env', 'esxi_host') }}"
-    esxi_user: "{{ lookup('env', 'esxi_user') }}"
-    esxi_password: "{{ lookup('env', 'esxi_password') }}"
-    datastore_name: "{{ lookup('env', 'datastore_name') }}"
-    iso_datastore: "{{ lookup('env', 'iso_datastore') }}"
-    iso_path: "{{ lookup('env', 'iso_path') }}"
-    vm_name: "{{ lookup('env', 'vm_name') }}"
-    vm_network: "{{ lookup('env', 'vm_network') }}"
-    dns_servers: "{{ lookup('env', 'dns_servers') | from_json }}"
-    default_gateway: "{{ lookup('env', 'default_gateway') }}"
-    ip_address: "{{ lookup('env', 'ip_address') }}"
-    netmask: "{{ lookup('env', 'netmask') }}"
-    new_user: "{{ lookup('env', 'new_user') }}"
-    new_user_password: "{{ lookup('env', 'new_user_password') }}"
-    ssh_public_key: "{{ lookup('env', 'ssh_public_key') }}"
-    memory_mb: 2048
-    num_cpus: 2
-    disk_size_gb: 30
-
+    
   tasks:
-    - name: Create a new VM
+    - name: Create the VM
       community.vmware.vmware_guest:
-        hostname: "{{ esxi_host }}"
-        username: "{{ esxi_user }}"
-        password: "{{ esxi_password }}"
+        hostname: "localhost.localdomain"
+        username: "root"
+        password: "Datait2024!"
         validate_certs: no
-        name: "{{ vm_name }}"
-        state: "present"
-        guest_id: "ubuntu64Guest"
-        folder: "/"
-        hardware:
-          memory_mb: "{{ memory_mb }}"
-          num_cpus: "{{ num_cpus }}"
-          scsi: "paravirtual"
-        disk:
-          - size_gb: "{{ disk_size_gb }}"
-            type: "thin"
-            datastore: "{{ datastore_name }}"
-        networks:
-          - name: "{{ vm_network }}"
-            type: "static"
-            ip: "{{ ip_address }}"
-            netmask: "{{ netmask }}"
-            gateway: "{{ default_gateway }}"
-            dns_servers: "{{ dns_servers }}"
-            start_connected: True
-        cdrom:
-          - controller_type: "sata"
-            iso_path: "[DataStore] ISO/ubuntu.24.04.1-live-server-ad64.iso"
-            state: "present"
-            type: "iso"
-            unit_number: "0"
-
-    - name: Power on the VM
-      community.vmware.vmware_guest_powerstate:
-        hostname: "{{ esxi_host }}"
-        username: "{{ esxi_user }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        name: "{{ vm_name }}"
+        folder: "/VM/"
+        name: "AnsibleDeployedMachine"
         state: "poweredon"
-      delegate_to: "localhost"
-
-    - name: Wait for the VM to become reachable
-      ansible.builtin.wait_for:
-        host: "{{ ip_address }}"
-        port: 22
-        timeout: 300
-      delegate_to: "localhost"
-
-    - name: Add new sudoer user
-      ansible.builtin.user:
-        name: "{{ new_user }}"
-        password: "{{ new_user_password | password_hash('sha512') }}"
-        groups: sudo
-        shell: /bin/bash
-
-    - name: Create .ssh directory for the new user
-      ansible.builtin.file:
-        path: "/home/{{ new_user }}/.ssh"
-        state: directory
-        owner: "{{ new_user }}"
-        group: "{{ new_user }}"
-        mode: 0700
-
-    - name: Add SSH public key to the new user
-      ansible.builtin.copy:
-        content: "{{ ssh_public_key }}"
-        dest: "/home/{{ new_user }}/.ssh/authorized_keys"
-        owner: "{{ new_user }}"
-        group: "{{ new_user }}"
-        mode: 0600
-
-    - name: Ensure the user has sudo privileges without a password
-      ansible.builtin.lineinfile:
-        path: /etc/sudoers
-        line: "{{ new_user }} ALL=(ALL) NOPASSWD:ALL"
-        validate: 'visudo -cf %s'
+        guest_id: "ubuntu64Guest"
+        esxi_hostname: "192.168.20.20"
+        disk:
+          - size_gb: "30"
+            type: "thin"
+            datastore: "DataStore"
+        hardware:
+          memory_mb: "4000"
+          num_cpus: "2"
+        networks:
+          - name: "vm-network"
+            start_connected: true
+        cdrom:
+          - type: "iso"
+            iso_path: "[DataStore] ISO/ubuntu-24.04.1-live-server-amd64.iso"
