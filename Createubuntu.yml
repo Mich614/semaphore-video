@@ -1,4 +1,4 @@
-- name: Create a virtual machine on given ESXi hostname
+- name: Create a new VM on a given ESXi hostname
   community.vmware.vmware_guest:
     hostname: "{{ localhost.localdomain }}"
     username: "{{ root }}"
