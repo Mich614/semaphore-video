@@ -2,6 +2,7 @@
   hosts: localhost
   gather_facts: false
   vars:
+    # Variables fetched from the environment
     esxi_host: "{{ lookup('env', 'esxi_host') }}"
     esxi_user: "{{ lookup('env', 'esxi_user') }}"
     esxi_password: "{{ lookup('env', 'esxi_password') }}"
@@ -49,10 +50,9 @@
             dns_servers: "{{ dns_servers }}"
             start_connected: True
         cdrom:
-          - controller_type: sata
-            iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
-            state: present
-            type: iso
+          type: iso
+          iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
+          state: present
         customization: {}
       delegate_to: localhost
 
@@ -63,7 +63,7 @@
         password: "{{ esxi_password }}"
         validate_certs: no
         name: "{{ vm_name }}"
-        state: powered-on
+        state: poweredon
       delegate_to: localhost
 
     - name: Wait for the VM to become reachable
