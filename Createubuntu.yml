@@ -1,4 +1,16 @@
-    - name: Fetch ESXi facts
+- name: Validate ESXi Connection and Datastore
+  hosts: localhost
+  gather_facts: false
+  vars:
+    esxi_host: "{{ lookup('env', 'esxi_host') }}"
+    esxi_user: "{{ lookup('env', 'esxi_user') }}"
+    esxi_password: "{{ lookup('env', 'esxi_password') }}"
+    datastore_name: "{{ lookup('env', 'datastore_name') }}"
+    iso_datastore: "{{ lookup('env', 'iso_datastore') }}"
+    iso_path: "{{ lookup('env', 'iso_path') }}"
+
+  tasks:
+    - name: Test connection to ESXi
       community.vmware.vmware_host_facts:
         hostname: "{{ esxi_host }}"
         username: "{{ esxi_user }}"
@@ -6,6 +18,13 @@
         validate_certs: no
       register: esxi_facts
 
-    - name: Debug ESXi facts
+    - name: Debug ESXi connection details
       ansible.builtin.debug:
         var: esxi_facts
+
+    - name: Debug Datastore and ISO details
+      ansible.builtin.debug:
+        msg:
+          - "Datastore Name: {{ datastore_name }}"
+          - "ISO Datastore: {{ iso_datastore }}"
+          - "ISO Path: {{ iso_path }}"
