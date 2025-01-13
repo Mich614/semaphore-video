@@ -2,7 +2,6 @@
   hosts: localhost
   gather_facts: false
   vars:
-    # Variables fetched from the environment
     esxi_host: "{{ lookup('env', 'esxi_host') }}"
     esxi_user: "{{ lookup('env', 'esxi_user') }}"
     esxi_password: "{{ lookup('env', 'esxi_password') }}"
@@ -50,8 +49,12 @@
             dns_servers: "{{ dns_servers }}"
             start_connected: True
         cdrom:
-          type: iso
+          controller_type: sata
           iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
+          state: present
+          type: iso
+        customization: {}
+      delegate_to: localhost
 
     - name: Power on the VM
       community.vmware.vmware_guest_powerstate:
