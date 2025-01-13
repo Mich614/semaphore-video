@@ -1,19 +1,16 @@
 - name: Create the VM with Static IP
   hosts: localhost
   gather_facts: false
-  vars:
-    esxi_password: "{{ lookup('env', 'esxi_password') }}"
-    vm_name: "{{ lookup('env', 'vm_name') }}"
     
   tasks:
     - name: Create the VM
       community.vmware.vmware_guest:
         hostname: "localhost.localdomain"
         username: "root"
-        password: "{{ esxi_password }}"
+        password: "Datait2024!"
         validate_certs: no
         folder: "/VM/"
-        name: "{{ vm_name }}"
+        name: "AnsibleDeployedMachine"
         state: "poweredon"
         guest_id: "ubuntu64Guest"
         esxi_hostname: "192.168.20.20"
@@ -26,11 +23,6 @@
           num_cpus: "2"
         networks:
           - name: "vm-network"
-            type: "static"
-            ip: "192.168.20.82"
-            netmask: "255.255.255.0"
-            gateway: "192.168.20.1"
-            dns_servers: "192.168.20.10"
             start_connected: true
         cdrom:
           type: "iso"
