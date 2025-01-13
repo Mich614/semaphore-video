@@ -52,9 +52,6 @@
         cdrom:
           type: iso
           iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
-          state: present
-        customization: {}
-      delegate_to: localhost
 
     - name: Power on the VM
       community.vmware.vmware_guest_powerstate:
