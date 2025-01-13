@@ -11,7 +11,7 @@
         validate_certs: no
         folder: "/"
         name: "AnsibleDeployedMachine"
-        state: "poweredon"
+        state: "powered-on"
         guest_id: "ubuntu64Guest"
         disk:
           - size_gb: "30"
