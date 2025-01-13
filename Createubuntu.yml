@@ -1,5 +1,5 @@
 - name: Minimal Test Playbook
-  hosts: esxi
+  hosts: localhost
   gather_facts: false
 
   tasks:
