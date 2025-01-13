@@ -1,5 +1,5 @@
 - name: Create the VM with Static IP
-  hosts: esxi
+  hosts: localhost
   gather_facts: false
 
   tasks:
