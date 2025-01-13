@@ -49,9 +49,11 @@
             dns_servers: "{{ dns_servers }}"
             start_connected: True
         cdrom:
-          - type: "iso"
-            iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
-            controller_type: "sata"
+          - controller_type: "sata"
+            iso_path: "[DataStore] ISO/ubuntu.24.04.1-live-server-ad64.iso"
+            state: "present"
+            type: "iso"
+            unit_number: "0"
 
     - name: Power on the VM
       community.vmware.vmware_guest_powerstate:
@@ -60,15 +62,15 @@
         password: "{{ esxi_password }}"
         validate_certs: no
         name: "{{ vm_name }}"
-        state: poweredon
-      delegate_to: localhost
+        state: "poweredon"
+      delegate_to: "localhost"
 
     - name: Wait for the VM to become reachable
       ansible.builtin.wait_for:
         host: "{{ ip_address }}"
         port: 22
         timeout: 300
-      delegate_to: localhost
+      delegate_to: "localhost"
 
     - name: Add new sudoer user
       ansible.builtin.user:
