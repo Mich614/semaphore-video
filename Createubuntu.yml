@@ -1,5 +1,5 @@
 - name: Create the VM with Static IP
-  hosts: esxi
+  hosts: localhost
   gather_facts: false
 
   tasks:
@@ -8,6 +8,7 @@
         hostname: "192.168.20.10"
         username: "root"
         password: "Datait2024!"
+        validate_certs: no
         folder: "/"
         name: "AnsibleDeployedMachine1"
         state: "present"
