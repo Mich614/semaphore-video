@@ -1,54 +1,29 @@
-- name: Create a new Ubuntu VM in the "VM" folder
-  hosts: localhost
-  gather_facts: false
-  vars:
-    esxi_host: "{{ lookup('env', 'esxi_host') }}"
-    esxi_user: "{{ lookup('env', 'esxi_user') }}"
-    esxi_password: "{{ lookup('env', 'esxi_password') }}"
-    datastore_name: "{{ lookup('env', 'datastore_name') }}"
-    vm_name: "{{ lookup('env', 'vm_name') }}"
-    iso_datastore: "DataStore"
-    iso_path: "ISO/ubuntu-24.04.1-live-server-amd64.iso"
-
-  tasks:
-    - name: Create the VM in the "VM" folder
-      community.vmware.vmware_guest:
-        hostname: "{{ esxi_host }}"
-        username: "{{ esxi_user }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        folder: "/VM/"
-        name: "{{ vm_name }}"
-        state: present
-        guest_id: ubuntu64Guest
-        hardware:
-          memory_mb: 4000
-          num_cpus: 2
-        disk:
-          - size_gb: 30
-            type: thin
-            datastore: "{{ datastore_name }}"
-        networks:
-          - name: "vm-network"
-            start_connected: true
-        cdrom:
-          type: iso
-          iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
-      delegate_to: localhost
-
-    - name: Power on the VM
-      community.vmware.vmware_guest_powerstate:
-        hostname: "{{ esxi_host }}"
-        username: "{{ esxi_user }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        name: "{{ vm_name }}"
-        state: poweredon
-      delegate_to: localhost
-
-    - name: Wait for the VM to become reachable
-      ansible.builtin.wait_for:
-        host: "{{ lookup('env', 'ip_address') }}"
-        port: 22
-        timeout: 300
-      delegate_to: localhost
+- name: Create a virtual machine on given ESXi hostname
+  community.vmware.vmware_guest:
+    hostname: "{{ localhost.localdomain }}"
+    username: "{{ root }}"
+    password: "{{ Datait2024! }}"
+    folder: /Ansible_vm/test_vm/
+    name: Ubuntu_test
+    state: poweredon
+    guest_id: centos64Guest
+    # This is hostname of particular ESXi server on which user wants VM to be deployed
+    esxi_hostname: "{{ localhost.localdomain }}"
+    disk:
+    - size_gb: 20
+      type: thin
+      datastore: DataStore
+    hardware:
+      memory_mb: 2048
+      num_cpus: 1
+      scsi: paravirtual
+    networks:
+    - name: VM Network
+      mac: aa:bb:dd:aa:00:14
+      ip: 192.168.20.99
+      netmask: 255.255.255.0
+      device_type: vmxnet3
+    wait_for_ip_address: true
+    wait_for_ip_address_timeout: 600
+  delegate_to: localhost
+  register: deploy_vm
