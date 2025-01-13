@@ -1,37 +1,14 @@
-- name: Create the VM with Static IP
-  hosts: localhost
+- name: Minimal Test Playbook
+  hosts: esxi
   gather_facts: false
 
   tasks:
-    - name: Create the VM
+    - name: Test VMware Connection
       community.vmware.vmware_guest:
         hostname: "192.168.20.10"
         username: "root"
         password: "Datait2024!"
         validate_certs: no
         folder: "/"
-        name: "AnsibleDeployedMachine1"
-        state: "present"
-        guest_id: "ubuntu64Guest"
-        disk:
-          - size_gb: "30"
-            type: "thin"
-            datastore: "DataStore"
-        hardware:
-          memory_mb: 4000
-          num_cpus: 2
-        networks:
-          - name: "VM Network"
-            type: "static"
-            ip: "192.168.20.82"
-            netmask: "255.255.255.0"
-            gateway: "192.168.20.1"
-            dns_servers:
-              - "192.168.20.20"
-            start_connected: true
-        cdrom:
-          - controller_number: 0
-            unit_number: 0
-            state: "present"
-            type: "iso"
-            iso_path: "[DataStore] ISO/ubuntu-24.04.1-live-server-amd64.iso"
+        name: "TestVM"
+        state: "absent"  # Change this to "present" if you want to create the VM
