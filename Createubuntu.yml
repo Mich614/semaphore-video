@@ -43,7 +43,11 @@
             datastore: "{{ datastore_name }}" 
         networks:
           - name: "{{ vm_network }}"
-            type: vmxnet3
+            type: static
+            ip: {{ ip_address }}
+            mask: {{ netmask }}
+            gateway: {{ default_gateway }}
+            dns_servers: {{ dns_servers }}
         cdrom:
           - controller_type: sata
             iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
