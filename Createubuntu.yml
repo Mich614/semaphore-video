@@ -33,5 +33,5 @@
             dns_servers: "192.168.20.10"
             start_connected: true
         cdrom:
-          type: iso
+          type: "iso"
           iso_path: "[DataStore] ISO/ubuntu-24.04.1-live-server-amd64.iso"
