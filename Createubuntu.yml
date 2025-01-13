@@ -8,7 +8,6 @@
         hostname: "192.168.20.10"
         username: "root"
         password: "Datait2024!"
-        validate_certs: no
         folder: "/"
         name: "AnsibleDeployedMachine1"
         state: "present"
@@ -23,7 +22,7 @@
         networks:
           - name: "VM Network"
             type: "static"
-            ip: "192.168.20.80"
+            ip: "192.168.20.82"
             netmask: "255.255.255.0"
             gateway: "192.168.20.1"
             dns_servers:
@@ -32,6 +31,6 @@
         cdrom:
           - controller_number: 0
             unit_number: 0
-            state: present
-            type: iso
+            state: "present"
+            type: "iso"
             iso_path: "[DataStore] ISO/ubuntu-24.04.1-live-server-amd64.iso"
