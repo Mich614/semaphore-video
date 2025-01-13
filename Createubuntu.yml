@@ -1,100 +1,11 @@
-- name: Create a new Ubuntu VM from an ISO
-  hosts: localhost
-  gather_facts: false
-  vars:
-    # Variables fetched from the environment
-    esxi_host: "{{ lookup('env', 'esxi_host') }}"
-    esxi_user: "{{ lookup('env', 'esxi_user') }}"
-    esxi_password: "{{ lookup('env', 'esxi_password') }}"
-    datastore_name: "{{ lookup('env', 'datastore_name') }}"
-    iso_datastore: "{{ lookup('env', 'iso_datastore') }}"
-    iso_path: "{{ lookup('env', 'iso_path') }}"
-    vm_name: "{{ lookup('env', 'vm_name') }}"
-    vm_network: "{{ lookup('env', 'vm_network') }}"
-    cpu_count: "{{ lookup('env', 'cpu_count') | int }}"
-    memory_mb: "{{ lookup('env', 'memory_mb') | int }}"
-    disk_size_gb: "{{ lookup('env', 'disk_size_gb') | int }}"
-    dns_servers: "{{ lookup('env', 'dns_servers') | from_json }}"
-    default_gateway: "{{ lookup('env', 'default_gateway') }}"
-    ip_address: "{{ lookup('env', 'ip_address') }}"
-    netmask: "{{ lookup('env', 'netmask') }}"
-    new_user: "{{ lookup('env', 'new_user') }}"
-    new_user_password: "{{ lookup('env', 'new_user_password') }}"
-    ssh_public_key: "{{ lookup('env', 'ssh_public_key') }}"
-
-  tasks:
-    - name: Create a new VM
-      community.vmware.vmware_guest:
+    - name: Fetch ESXi facts
+      community.vmware.vmware_host_facts:
         hostname: "{{ esxi_host }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
         validate_certs: no
-        name: "{{ vm_name }}"
-        state: powered-on
-        guest_id: ubuntu64Guest
-        folder: "/"
-        hardware:
-          memory_mb: "{{ memory_mb }}"
-          num_cpus: "{{ cpu_count }}"
-          scsi: paravirtual
-        disk:
-          - size_gb: "{{ disk_size_gb }}"
-            type: thin
-            datastore: "{{ datastore_name }}"
-        networks:
-          - name: "{{ vm_network }}"
-            type: vmxnet3
-        cdrom:
-          - controller_type: sata
-            iso_path: "[{{ iso_datastore }}] {{ iso_path }}"
-            state: present
-            type: iso
-            unit_number: 0
-        customization: {}
-      delegate_to: localhost
+      register: esxi_facts
 
-    - name: Power on the VM
-      community.vmware.vmware_guest_powerstate:
-        hostname: "{{ esxi_host }}"
-        username: "{{ esxi_user }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        name: "{{ vm_name }}"
-        state: poweredon
-      delegate_to: localhost
-
-    - name: Wait for the VM to become reachable
-      ansible.builtin.wait_for:
-        host: "{{ ip_address }}"
-        port: 22
-        timeout: 300
-      delegate_to: localhost
-
-    - name: Add new sudoer user
-      ansible.builtin.user:
-        name: "{{ new_user }}"
-        password: "{{ new_user_password | password_hash('sha512') }}"
-        groups: sudo
-        shell: /bin/bash
-
-    - name: Create .ssh directory for the new user
-      ansible.builtin.file:
-        path: "/home/{{ new_user }}/.ssh"
-        state: directory
-        owner: "{{ new_user }}"
-        group: "{{ new_user }}"
-        mode: 0700
-
-    - name: Add SSH public key to the new user
-      ansible.builtin.copy:
-        content: "{{ ssh_public_key }}"
-        dest: "/home/{{ new_user }}/.ssh/authorized_keys"
-        owner: "{{ new_user }}"
-        group: "{{ new_user }}"
-        mode: 0600
-
-    - name: Ensure the user has sudo privileges without a password
-      ansible.builtin.lineinfile:
-        path: /etc/sudoers
-        line: "{{ new_user }} ALL=(ALL) NOPASSWD:ALL"
-        validate: 'visudo -cf %s'
+    - name: Debug ESXi facts
+      ansible.builtin.debug:
+        var: esxi_facts
