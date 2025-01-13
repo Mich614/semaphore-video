@@ -31,7 +31,7 @@
         name: "{{ vm_name }}"
         state: "present"
         guest_id: "ubuntu64Guest"
-        folder: "{{ DataStore}} VM/"
+        folder: "VM/"
         hardware:
           memory_mb: "{{ memory_mb }}"
           num_cpus: "{{ num_cpus }}"
