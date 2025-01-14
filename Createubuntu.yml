@@ -10,7 +10,7 @@
         password: "Datait2024!"
         validate_certs: no
         folder: "/"
-        name: "AnsibleDeployedMachine7"
+        name: "AnsibleDeployedMachine8"
         state: "present"
         guest_id: "ubuntu64Guest"
         disk:
@@ -22,7 +22,6 @@
           num_cpus: 2
         networks:
           - name: "VM Network"
-            type: "dhcp"
             start_connected: true
         cdrom:
           - controller_number: 0
