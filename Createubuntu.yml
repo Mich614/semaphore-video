@@ -6,47 +6,46 @@
     user_data_path: "/home/gruppe2/AnsibleDeployments/user-data"
     meta_data_path: "/home/gruppe2/AnsibleDeployments/meta-data"
     iso_path: "/home/gruppe2/AnsibleDeployments/cloud-init.iso"
-    esxi_iso_path: "/vmfs/volumes/Datastore/Ansible/Cloud/cloud-init.iso"
-    esxi_password: "Datait2024!"
+    esxi_iso_path: "/vmfs/volumes/DataStore/Ansible/Cloud/cloud-init.iso"
 
   tasks:
     - name: Generate meta-data file dynamically
-      ansible.builtin.copy:
+      copy:
         dest: "{{ meta_data_path }}"
         content: |
           instance-id: "{{ vm_name }}"
           local-hostname: "{{ vm_name }}"
 
     - name: Create Cloud-Init ISO
-      ansible.builtin.shell:
+      ansible.builtin.command:
         cmd: >
           genisoimage -output "{{ iso_path }}"
           -volid cidata -joliet -rock
           "{{ user_data_path }}" "{{ meta_data_path }}"
-      args:
-        executable: /bin/bash
 
-    - name: Ensure target directory exists on ESXi server
-      ansible.builtin.shell:
+    - name: Verify if the ESXi directory exists
+      ansible.builtin.command:
         cmd: >
-          sshpass -p "{{ esxi_password }}" ssh -o StrictHostKeyChecking=no root@192.168.20.10 "mkdir -p /vmfs/volumes/Datastore/Ansible/Cloud"
-      args:
-        executable: /bin/bash
+          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@192.168.20.10
+          "test -d /vmfs/volumes/DataStore/Ansible/Cloud"
+      register: directory_check
+      failed_when: directory_check.rc != 0
+      ignore_errors: false
 
     - name: Transfer Cloud-Init ISO to ESXi server
-      ansible.builtin.shell:
+      ansible.builtin.command:
         cmd: >
-          sshpass -p "{{ esxi_password }}" scp -o StrictHostKeyChecking=no "{{ iso_path }}" root@192.168.20.10:"{{ esxi_iso_path }}"
-      args:
-        executable: /bin/bash
+          sshpass -p "Datait2024!" scp -o StrictHostKeyChecking=no
+          "{{ iso_path }}" root@192.168.20.10:"{{ esxi_iso_path }}"
+      register: transfer_result
+      failed_when: transfer_result.rc != 0
 
     - name: Verify Cloud-Init ISO on ESXi server
-      ansible.builtin.shell:
+      ansible.builtin.command:
         cmd: >
-          sshpass -p "{{ esxi_password }}" ssh -o StrictHostKeyChecking=no root@192.168.20.10 "ls -l {{ esxi_iso_path }}"
+          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@192.168.20.10
+          "ls -l {{ esxi_iso_path }}"
       register: verification_result
-      args:
-        executable: /bin/bash
 
     - name: Display verification result
       ansible.builtin.debug:
