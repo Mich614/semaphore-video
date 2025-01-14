@@ -10,7 +10,7 @@
         password: "Datait2024!"
         validate_certs: no
         folder: "/"
-        name: "AnsibleDeployedMachine2"
+        name: "AnsibleDeployedMachine3"
         state: "present"
         guest_id: "ubuntu64Guest"
         disk:
@@ -22,12 +22,7 @@
           num_cpus: 2
         networks:
           - name: "VM Network"
-            type: "static"
-            ip: "192.168.20.82"
-            netmask: "255.255.255.0"
-            gateway: "192.168.20.1"
-            dns_servers:
-              - "192.168.20.20"
+            type: "dhcp"
             start_connected: true
         cdrom:
           - controller_number: 0
