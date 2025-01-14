@@ -2,11 +2,11 @@
   hosts: localhost
   gather_facts: false
   vars:
-    vm_name: "AnsibleDeployedMachine10Test"
+    vm_name: "AnsibleDeployedMachine10Test1"
     user_data_path: "/home/gruppe2/AnsibleDeployments/user-data"
     meta_data_path: "/home/gruppe2/AnsibleDeployments/meta-data"
     iso_path: "/home/gruppe2/AnsibleDeployments/cloud-init.iso"
-    esxi_iso_path: "[Datastore] Ansible/Cloud/cloud-init.iso"
+    esxi_iso_path: "/vmfs/volumes/Datastore/Ansible/Cloud/cloud-init.iso"
 
   tasks:
     - name: Generate meta-data file dynamically
@@ -23,9 +23,23 @@
           -volid cidata -joliet -rock
           "{{ user_data_path }}" "{{ meta_data_path }}"
 
-    - name: Simulate moving Cloud-Init ISO to ESXi server
-      ansible.builtin.debug:
-        msg: >
-          Simulating copy of "{{ iso_path }}"
-          to ESXi server at "{{ esxi_iso_path }}"
+    - name: Ensure target directory exists on ESXi server
+      ansible.builtin.command:
+        cmd: >
+          ssh root@192.168.20.10 "mkdir -p /vmfs/volumes/Datastore/Ansible/Cloud"
+        warn: false
 
+    - name: Transfer Cloud-Init ISO to ESXi server
+      ansible.builtin.command:
+        cmd: >
+          scp "{{ iso_path }}" root@192.168.20.10:"{{ esxi_iso_path }}"
+
+    - name: Verify Cloud-Init ISO on ESXi server
+      ansible.builtin.command:
+        cmd: >
+          ssh root@192.168.20.10 "ls -l {{ esxi_iso_path }}"
+      register: verification_result
+
+    - name: Display verification result
+      ansible.builtin.debug:
+        var: verification_result.stdout
