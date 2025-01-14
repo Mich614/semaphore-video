@@ -6,6 +6,7 @@
     user_data_path: "/home/gruppe2/AnsibleDeployments/user-data"
     meta_data_path: "/home/gruppe2/AnsibleDeployments/meta-data"
     iso_path: "/home/gruppe2/AnsibleDeployments/cloud-init.iso"
+    esxi_iso_path_upload: "/vmfs/volumes/DataStore/Ansible/Cloud"
     esxi_iso_path: "/vmfs/volumes/Datastore/Ansible/Cloud/cloud-init.iso"
     esxi_hostname: "192.168.20.10"
     esxi_username: "root"
@@ -41,16 +42,11 @@
       failed_when: directory_check.rc != 0
       ignore_errors: false
 
-    - name: Ensure the target directory exists on ESXi server if not exists
-      ansible.builtin.command:
-        cmd: >
-          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@{{ esxi_hostname }} "mkdir -p /vmfs/volumes/DataStore/Ansible/Cloud"
-      when: directory_check.rc != 0
-
     - name: Transfer Cloud-Init ISO to ESXi server
       ansible.builtin.command:
         cmd: >
-          sshpass -p "Datait2024!" scp -o StrictHostKeyChecking=no "{{ iso_path }}" root@{{ esxi_hostname }}:"{{ esxi_iso_path }}"
+          sshpass -p "Datait2024!" scp -o StrictHostKeyChecking=no
+          "{{ iso_path }}" root@192.168.20.10:"{{ esxi_iso_path_upload }}"
       register: transfer_result
       failed_when: transfer_result.rc != 0
 
