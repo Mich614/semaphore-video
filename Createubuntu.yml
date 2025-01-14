@@ -1,19 +1,31 @@
-- name: Verify Python 3.12 and pyVmomi
+- name: Create a VM with Static IP
   hosts: localhost
   gather_facts: false
 
   tasks:
-    - name: Check Python version
-      ansible.builtin.command:
-        cmd: python3.12 --version
-      register: python_version
-    - debug:
-        msg: "Python version: {{ python_version.stdout }}"
-
-    - name: Test pyVmomi JSONEncoder
-      ansible.builtin.command:
-        cmd: python3.12 -c "from pyVmomi.VmomiSupport import VmomiJSONEncoder; print('VmomiJSONEncoder works!')"
-      register: pyvmomi_test
-      failed_when: pyvmomi_test.rc != 0
-    - debug:
-        msg: "pyVmomi Test Output: {{ pyvmomi_test.stdout }}"
+    - name: Create the VM
+      community.vmware.vmware_guest:
+        hostname: "192.168.20.10"
+        username: "root"
+        password: "Datait2024!"
+        validate_certs: no
+        folder: "/"
+        name: "AnsibleDeployedMachine8"
+        state: "present"
+        guest_id: "ubuntu64Guest"
+        disk:
+          - size_gb: "30"
+            type: "thin"
+            datastore: "DataStore"
+        hardware:
+          memory_mb: 4000
+          num_cpus: 2
+        networks:
+          - name: "VM Network"
+            start_connected: true
+        cdrom:
+          - controller_number: 0
+            unit_number: 0
+            state: "present"
+            type: "iso"
+            iso_path: "[DataStore] ISO/ubuntu-24.04.1-live-server-amd64.iso"
