@@ -7,7 +7,7 @@
     meta_data_path: "/home/gruppe2/AnsibleDeployments/meta-data"
     iso_path: "/home/gruppe2/AnsibleDeployments/cloud-init.iso"
     esxi_iso_path_upload: "/vmfs/volumes/DataStore/Ansible/Cloud"
-    esxi_iso_path: "/vmfs/volumes/Datastore/Ansible/Cloud/cloud-init.iso"
+    esxi_iso_path: "/vmfs/volumes/DataStore/Ansible/Cloud/cloud-init.iso"
     esxi_hostname: "192.168.20.10"
     esxi_username: "root"
     esxi_password: "Datait2024!"
