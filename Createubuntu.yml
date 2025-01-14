@@ -2,7 +2,7 @@
   hosts: localhost
   gather_facts: false
   vars:
-    vm_name: "AnsibleDeployedMachineTest1"
+    vm_name: "AnsibleDeployedMachineTest2"
     user_data_path: "/home/gruppe2/AnsibleDeployments/user-data"
     meta_data_path: "/home/gruppe2/AnsibleDeployments/meta-data"
     iso_path: "/home/gruppe2/AnsibleDeployments/cloud-init.iso"
@@ -105,7 +105,7 @@
         validate_certs: no
         folder: "/"
         name: "{{ vm_name }}"
-        state: "poweredon"
+        state: "powered-on"
 
     - name: Wait for the VM to boot up and complete installation
       wait_for:
@@ -122,7 +122,7 @@
         validate_certs: no
         folder: "/"
         name: "{{ vm_name }}"
-        state: "poweredoff"
+        state: "powered-off"
 
     - name: Attach Cloud-Init ISO after first boot
       community.vmware.vmware_guest:
@@ -131,7 +131,7 @@
         password: "{{ esxi_password }}"
         validate_certs: no
         name: "{{ vm_name }}"
-        state: "poweredon"
+        state: "powered-on"
         cdrom:
           - controller_number: 0
             unit_number: 0
