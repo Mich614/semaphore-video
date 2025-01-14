@@ -1,12 +1,22 @@
-- name: Simulate VM Creation
+- name: Create Meta-Data, Cloud-Init ISO, and Deploy VM with Ubuntu Gnome
   hosts: localhost
   gather_facts: false
   vars:
-    vm_name: "AnsibleDeployedMachine10Test1"
+    vm_name: "AnsibleDeployedMachineTest1"
     user_data_path: "/home/gruppe2/AnsibleDeployments/user-data"
     meta_data_path: "/home/gruppe2/AnsibleDeployments/meta-data"
     iso_path: "/home/gruppe2/AnsibleDeployments/cloud-init.iso"
-    esxi_iso_path: "/vmfs/volumes/DataStore/Ansible/Cloud/cloud-init.iso"
+    esxi_iso_path: "/vmfs/volumes/Datastore/Ansible/Cloud/cloud-init.iso"
+    esxi_hostname: "192.168.20.10"
+    esxi_username: "root"
+    esxi_password: "Datait2024!"
+    guest_id: "ubuntu64Guest"
+    datastore: "DataStore"
+    vm_network: "VM Network"
+    vm_ip: "192.168.20.81"
+    vm_memory_mb: 4000
+    vm_cpus: 2
+    gnome_install_command: "sudo apt update && sudo apt install -y ubuntu-gnome-desktop"
 
   tasks:
     - name: Generate meta-data file dynamically
@@ -23,30 +33,79 @@
           -volid cidata -joliet -rock
           "{{ user_data_path }}" "{{ meta_data_path }}"
 
-    - name: Verify if the ESXi directory exists
+    - name: Ensure target directory exists on ESXi server
       ansible.builtin.command:
         cmd: >
-          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@192.168.20.10
-          "test -d /vmfs/volumes/DataStore/Ansible/Cloud"
-      register: directory_check
-      failed_when: directory_check.rc != 0
-      ignore_errors: false
+          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@{{ esxi_hostname }} "mkdir -p /vmfs/volumes/Datastore/Ansible/Cloud"
 
     - name: Transfer Cloud-Init ISO to ESXi server
       ansible.builtin.command:
         cmd: >
-          sshpass -p "Datait2024!" scp -o StrictHostKeyChecking=no
-          "{{ iso_path }}" root@192.168.20.10:"{{ esxi_iso_path }}"
-      register: transfer_result
-      failed_when: transfer_result.rc != 0
+          sshpass -p "Datait2024!" scp -o StrictHostKeyChecking=no "{{ iso_path }}" root@{{ esxi_hostname }}:"{{ esxi_iso_path }}"
 
-    - name: Verify Cloud-Init ISO on ESXi server
+    - name: Create the Virtual Machine
+      community.vmware.vmware_guest:
+        hostname: "{{ esxi_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+        folder: "/"
+        name: "{{ vm_name }}"
+        state: "poweredoff"
+        guest_id: "{{ guest_id }}"
+        disk:
+          - size_gb: 30
+            type: thin
+            datastore: "{{ datastore }}"
+        hardware:
+          memory_mb: "{{ vm_memory_mb }}"
+          num_cpus: "{{ vm_cpus }}"
+        networks:
+          - name: "{{ vm_network }}"
+            type: static
+            ip: "{{ vm_ip }}"
+            netmask: "255.255.255.0"
+            gateway: "192.168.20.1"
+            dns_servers:
+              - "8.8.8.8"
+        cdrom:
+          - controller_number: 0
+            unit_number: 0
+            state: present
+            type: iso
+            iso_path: "{{ esxi_iso_path }}"
+
+    - name: Power On the Virtual Machine
+      community.vmware.vmware_guest_powerstate:
+        hostname: "{{ esxi_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+        folder: "/"
+        name: "{{ vm_name }}"
+        state: "poweredon"
+
+    - name: Wait for the VM to Boot
+      wait_for:
+        timeout: 300
+        port: 22
+        host: "{{ vm_ip }}"
+      delegate_to: localhost
+
+    - name: Install Ubuntu Gnome Desktop
+      ansible.builtin.shell:
+        cmd: "{{ gnome_install_command }}"
+      become: true
+      args:
+        executable: /bin/bash
+      delegate_to: "{{ vm_ip }}"
+
+    - name: Verify Ubuntu Gnome Installation
       ansible.builtin.command:
-        cmd: >
-          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@192.168.20.10
-          "ls -l {{ esxi_iso_path }}"
-      register: verification_result
+        cmd: "gnome-shell --version"
+      delegate_to: "{{ vm_ip }}"
+      register: gnome_version
 
-    - name: Display verification result
+    - name: Display GNOME Version
       ansible.builtin.debug:
-        var: verification_result.stdout
+        var: gnome_version.stdout
