@@ -1,24 +1,19 @@
-- name: Verify Python Environment
+- name: Verify Python 3.12 and pyVmomi
   hosts: localhost
-  gather_facts: true  # Ensure facts are gathered to populate ansible_python
+  gather_facts: false
 
   tasks:
-    - name: Verify Python version
+    - name: Check Python version
       ansible.builtin.command:
-        cmd: python3 --version
+        cmd: python3.12 --version
       register: python_version
     - debug:
         msg: "Python version: {{ python_version.stdout }}"
 
-    - name: Verify installed pip packages
-      ansible.builtin.shell:
-        cmd: python3.12 -m pip list
-      register: pip_list
+    - name: Test pyVmomi JSONEncoder
+      ansible.builtin.command:
+        cmd: python3.12 -c "from pyVmomi.VmomiSupport import VmomiJSONEncoder; print('VmomiJSONEncoder works!')"
+      register: pyvmomi_test
+      failed_when: pyvmomi_test.rc != 0
     - debug:
-        msg: "Installed pip packages:\n{{ pip_list.stdout_lines }}"
-
-    - name: Verify Ansible Python version and location
-      debug:
-        msg: >
-          Ansible is using Python version {{ ansible_facts.python.version.full }}
-          located at {{ ansible_facts.python.executable }}
+        msg: "pyVmomi Test Output: {{ pyvmomi_test.stdout }}"
