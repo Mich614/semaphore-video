@@ -1,6 +1,6 @@
 - name: Verify Python Environment
   hosts: localhost
-  gather_facts: true  # Enable fact gathering
+  gather_facts: true  # Ensure facts are gathered to populate ansible_python
 
   tasks:
     - name: Verify Python version
@@ -17,15 +17,8 @@
     - debug:
         msg: "Installed pip packages:\n{{ pip_list.stdout_lines }}"
 
-    - name: Verify Ansible Python interpreter
+    - name: Verify Ansible Python version and location
       debug:
-        msg: "Ansible is using interpreter {{ ansible_python.interpreter }}"
-
-    - name: Create a file locally with Python info
-      ansible.builtin.copy:
-        content: |
-          Python Version: {{ python_version.stdout }}
-          Installed Pip Packages:
-          {{ pip_list.stdout_lines | join('\n') }}
-          Ansible Python Interpreter: {{ ansible_python.interpreter }}
-        dest: ./pythoninfo.txt
+        msg: >
+          Ansible is using Python version {{ ansible_facts.python.version.full }}
+          located at {{ ansible_facts.python.executable }}
