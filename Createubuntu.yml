@@ -33,15 +33,32 @@
           -volid cidata -joliet -rock
           "{{ user_data_path }}" "{{ meta_data_path }}"
 
-    - name: Ensure target directory exists on ESXi server
+    - name: Verify if the ESXi directory exists
       ansible.builtin.command:
         cmd: >
-          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@{{ esxi_hostname }} "mkdir -p /vmfs/volumes/Datastore/Ansible/Cloud"
+          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@192.168.20.10
+          "test -d /vmfs/volumes/DataStore/Ansible/Cloud"
+      register: directory_check
+      failed_when: directory_check.rc != 0
+      ignore_errors: false
 
     - name: Transfer Cloud-Init ISO to ESXi server
       ansible.builtin.command:
         cmd: >
           sshpass -p "Datait2024!" scp -o StrictHostKeyChecking=no "{{ iso_path }}" root@{{ esxi_hostname }}:"{{ esxi_iso_path }}"
+
+    - name: Verify Cloud-Init ISO on ESXi server before proceeding
+      ansible.builtin.command:
+        cmd: >
+          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@{{ esxi_hostname }} "test -f {{ esxi_iso_path }}"
+      register: iso_check
+      failed_when: iso_check.rc != 0
+      ignore_errors: false
+
+    - name: Fail if Cloud-Init ISO is not found
+      ansible.builtin.fail:
+        msg: "Cloud-Init ISO is not present on ESXi server. Aborting VM creation."
+      when: iso_check.rc != 0
 
     - name: Create the Virtual Machine
       community.vmware.vmware_guest:
