@@ -10,7 +10,7 @@
         password: "Datait2024!"
         validate_certs: no
         folder: "/"
-        name: "AnsibleDeployedMachine6"
+        name: "AnsibleDeployedMachine7"
         state: "present"
         guest_id: "ubuntu64Guest"
         disk:
