@@ -1,20 +1,31 @@
-- name: Verify Python and pyVmomi
+- name: Verify Python Environment
   hosts: localhost
+  gather_facts: true  # Enable fact gathering
+
   tasks:
-    - name: Show Python version
+    - name: Verify Python version
       ansible.builtin.command:
         cmd: python3 --version
       register: python_version
     - debug:
         msg: "Python version: {{ python_version.stdout }}"
 
-    - name: List installed pip packages
-      ansible.builtin.command:
+    - name: Verify installed pip packages
+      ansible.builtin.shell:
         cmd: python3.12 -m pip list
       register: pip_list
     - debug:
-        msg: "Pip packages: {{ pip_list.stdout_lines }}"
+        msg: "Installed pip packages:\n{{ pip_list.stdout_lines }}"
 
     - name: Verify Ansible Python interpreter
       debug:
-        msg: "Ansible is using {{ ansible_python.version.full }} at {{ ansible_python.interpreter }}"
+        msg: "Ansible is using interpreter {{ ansible_python.interpreter }}"
+
+    - name: Create a file locally with Python info
+      ansible.builtin.copy:
+        content: |
+          Python Version: {{ python_version.stdout }}
+          Installed Pip Packages:
+          {{ pip_list.stdout_lines | join('\n') }}
+          Ansible Python Interpreter: {{ ansible_python.interpreter }}
+        dest: ./pythoninfo.txt
