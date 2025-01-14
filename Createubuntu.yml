@@ -53,7 +53,8 @@
     - name: Verify Cloud-Init ISO on ESXi server
       ansible.builtin.command:
         cmd: >
-          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@{{ esxi_hostname }} "ls -l {{ esxi_iso_path }}"
+          sshpass -p "Datait2024!" ssh -o StrictHostKeyChecking=no root@192.168.20.10
+          "ls -l {{ esxi_iso_path }}"
       register: iso_check
       failed_when: iso_check.rc != 0
       ignore_errors: false
