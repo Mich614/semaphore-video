@@ -122,15 +122,20 @@
         name: "{{ vm_name }}"
         state: "powered-off"
 
-    - name: Reattach Cloud-Init ISO after first boot
-      community.vmware.vmware_guest_cdrom:
+    - name: Reattach Cloud-Init ISO to the Virtual Machine after First Boot
+      community.vmware.vmware_guest:
         hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_username }}"
         password: "{{ esxi_password }}"
         validate_certs: no
+        folder: "/"
         name: "{{ vm_name }}"
-        iso_path: "[DataStore] {{ esxi_cloudiso_path }}"
-        state: "present"
+        cdrom:
+          - controller_number: 0
+            unit_number: 0
+            state: present
+            type: iso
+            iso_path: "[DataStore] {{ esxi_cloudiso_path }}"
 
     - name: Power cycle the VM to read Cloud-Init
       community.vmware.vmware_guest_powerstate:
