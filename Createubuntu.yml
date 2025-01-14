@@ -2,7 +2,7 @@
   hosts: localhost
   gather_facts: false
   vars:
-    vm_name: "AnsibleDeployedMachineTest5"
+    vm_name: "AnsibleDeployedMachineTest1"
     user_data_path: "/home/gruppe2/AnsibleDeployments/user-data"
     meta_data_path: "/home/gruppe2/AnsibleDeployments/meta-data"
     iso_path: "/home/gruppe2/AnsibleDeployments/cloud-init.iso"
@@ -73,7 +73,7 @@
         validate_certs: no
         folder: "/"
         name: "{{ vm_name }}"
-        state: "powered-off"
+        state: "poweredoff"
         guest_id: "{{ guest_id }}"
         disk:
           - size_gb: 30
@@ -96,6 +96,12 @@
             state: present
             type: iso
             iso_path: "[DataStore] {{ esxi_iso_path }}"
+        floppy:
+          - controller_number: 0
+            unit_number: 0
+            state: present
+            type: iso
+            iso_path: "[DataStore] {{ esxi_cloudiso_path }}"
 
     - name: Power On the Virtual Machine
       community.vmware.vmware_guest_powerstate:
@@ -105,54 +111,13 @@
         validate_certs: no
         folder: "/"
         name: "{{ vm_name }}"
-        state: "powered-on"
+        state: "poweredon"
 
-    - name: Wait for the VM to Boot
+    - name: Wait for the VM to Boot and Complete Installation
       wait_for:
-        timeout: 30
-      delegate_to: localhost
-
-    - name: Power Off the Virtual Machine
-      community.vmware.vmware_guest_powerstate:
-        hostname: "{{ esxi_hostname }}"
-        username: "{{ esxi_username }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        folder: "/"
-        name: "{{ vm_name }}"
-        state: "powered-off"
-
-    - name: Reattach Cloud-Init ISO to the Virtual Machine after First Boot
-      community.vmware.vmware_guest:
-        hostname: "{{ esxi_hostname }}"
-        username: "{{ esxi_username }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        folder: "/"
-        name: "{{ vm_name }}"
-        cdrom:
-          - controller_number: 0
-            unit_number: 0
-            state: present
-            type: iso
-            iso_path: "[DataStore] {{ esxi_cloudiso_path }}"
-
-    - name: Power cycle the VM to read Cloud-Init
-      community.vmware.vmware_guest_powerstate:
-        hostname: "{{ esxi_hostname }}"
-        username: "{{ esxi_username }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        folder: "/"
-        name: "{{ vm_name }}"
-        state: "powered-on"
-
-    - name: Wait for Cloud-Init to apply the configuration
-      wait_for:
-        timeout: 300
-        host: "{{ vm_ip }}"
+        timeout: 420
         port: 22
-        delay: 20
+        host: "{{ vm_ip }}"
       delegate_to: localhost
 
     - name: Install Ubuntu Gnome Desktop
