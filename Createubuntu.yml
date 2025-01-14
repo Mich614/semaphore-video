@@ -7,6 +7,7 @@
     meta_data_path: "/home/gruppe2/AnsibleDeployments/meta-data"
     iso_path: "/home/gruppe2/AnsibleDeployments/cloud-init.iso"
     esxi_iso_path: "/vmfs/volumes/Datastore/Ansible/Cloud/cloud-init.iso"
+    esxi_password: "Datait2024!"
 
   tasks:
     - name: Generate meta-data file dynamically
@@ -27,19 +28,22 @@
 
     - name: Ensure target directory exists on ESXi server
       ansible.builtin.shell:
-        cmd: ssh root@192.168.20.10 "mkdir -p /vmfs/volumes/Datastore/Ansible/Cloud"
+        cmd: >
+          sshpass -p "{{ esxi_password }}" ssh -o StrictHostKeyChecking=no root@192.168.20.10 "mkdir -p /vmfs/volumes/Datastore/Ansible/Cloud"
       args:
         executable: /bin/bash
 
     - name: Transfer Cloud-Init ISO to ESXi server
       ansible.builtin.shell:
-        cmd: scp "{{ iso_path }}" root@192.168.20.10:"{{ esxi_iso_path }}"
+        cmd: >
+          sshpass -p "{{ esxi_password }}" scp -o StrictHostKeyChecking=no "{{ iso_path }}" root@192.168.20.10:"{{ esxi_iso_path }}"
       args:
         executable: /bin/bash
 
     - name: Verify Cloud-Init ISO on ESXi server
       ansible.builtin.shell:
-        cmd: ssh root@192.168.20.10 "ls -l {{ esxi_iso_path }}"
+        cmd: >
+          sshpass -p "{{ esxi_password }}" ssh -o StrictHostKeyChecking=no root@192.168.20.10 "ls -l {{ esxi_iso_path }}"
       register: verification_result
       args:
         executable: /bin/bash
