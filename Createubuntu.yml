@@ -73,7 +73,7 @@
         validate_certs: no
         folder: "/"
         name: "{{ vm_name }}"
-        state: "poweredoff"
+        state: "powered-off"
         guest_id: "{{ guest_id }}"
         disk:
           - size_gb: 30
@@ -111,7 +111,7 @@
         validate_certs: no
         folder: "/"
         name: "{{ vm_name }}"
-        state: "poweredon"
+        state: "powered-on"
 
     - name: Wait for the VM to Boot and Complete Installation
       wait_for:
@@ -128,7 +128,7 @@
         validate_certs: no
         folder: "/"
         name: "{{ vm_name }}"
-        state: "poweredoff"
+        state: "powered-off"
 
     - name: Reattach Cloud-Init ISO and Power On the VM
       community.vmware.vmware_guest:
@@ -137,7 +137,7 @@
         password: "{{ esxi_password }}"
         validate_certs: no
         name: "{{ vm_name }}"
-        state: "poweredon"
+        state: "powered-on"
         cdrom:
           - controller_number: 0
             unit_number: 1
