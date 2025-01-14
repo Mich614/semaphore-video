@@ -110,8 +110,6 @@
     - name: Wait for the VM to boot up and complete installation
       wait_for:
         timeout: 60
-        port: 22
-        host: "{{ vm_ip }}"
       delegate_to: localhost
 
     - name: Power Off the Virtual Machine after Ubuntu installation
