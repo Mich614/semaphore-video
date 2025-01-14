@@ -2,7 +2,7 @@
   hosts: localhost
   gather_facts: false
   vars:
-    vm_name: "AnsibleDeployedMachineTest4"
+    vm_name: "AnsibleDeployedMachineTest102"
     user_data_path: "/home/gruppe2/AnsibleDeployments/user-data"
     meta_data_path: "/home/gruppe2/AnsibleDeployments/meta-data"
     iso_path: "/home/gruppe2/AnsibleDeployments/cloud-init.iso"
@@ -73,7 +73,7 @@
         validate_certs: no
         folder: "/"
         name: "{{ vm_name }}"
-        state: "poweredoff"
+        state: "powered-off"
         guest_id: "{{ guest_id }}"
         disk:
           - size_gb: 30
@@ -105,50 +105,39 @@
         validate_certs: no
         folder: "/"
         name: "{{ vm_name }}"
-        state: "poweredon"
+        state: "powered-on"
 
     - name: Wait for the VM to boot up and complete installation
       wait_for:
         timeout: 600
-        port: 22
-        host: "{{ vm_ip }}"
       delegate_to: localhost
 
-    - name: Detach Ubuntu ISO
-      community.vmware.vmware_guest_cdrom:
+    - name: Detach Ubuntu ISO after first boot
+      community.vmware.vmware_guest:
         hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_username }}"
         password: "{{ esxi_password }}"
         validate_certs: no
         name: "{{ vm_name }}"
-        state: absent
+        state: "powered-off"
         cdrom:
-          unit_number: 0
+          - unit_number: 0
+            state: absent
 
     - name: Reattach Cloud-Init ISO
-      community.vmware.vmware_guest_cdrom:
+      community.vmware.vmware_guest:
         hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_username }}"
         password: "{{ esxi_password }}"
         validate_certs: no
         name: "{{ vm_name }}"
-        state: present
+        state: "powered-on"
         cdrom:
-          controller_number: 0
-          unit_number: 1
-          state: present
-          type: iso
-          iso_path: "[DataStore] {{ esxi_cloudiso_path }}"
-
-    - name: Power on the VM for Cloud-Init
-      community.vmware.vmware_guest_powerstate:
-        hostname: "{{ esxi_hostname }}"
-        username: "{{ esxi_username }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        folder: "/"
-        name: "{{ vm_name }}"
-        state: "poweredon"
+          - controller_number: 0
+            unit_number: 1
+            state: present
+            type: iso
+            iso_path: "[DataStore] {{ esxi_cloudiso_path }}"
 
     - name: Wait for Cloud-Init to apply
       wait_for:
