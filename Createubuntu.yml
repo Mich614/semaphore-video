@@ -10,35 +10,39 @@
 
   tasks:
     - name: Generate meta-data file dynamically
-      copy:
+      ansible.builtin.copy:
         dest: "{{ meta_data_path }}"
         content: |
           instance-id: "{{ vm_name }}"
           local-hostname: "{{ vm_name }}"
 
     - name: Create Cloud-Init ISO
-      ansible.builtin.command:
+      ansible.builtin.shell:
         cmd: >
           genisoimage -output "{{ iso_path }}"
           -volid cidata -joliet -rock
           "{{ user_data_path }}" "{{ meta_data_path }}"
+      args:
+        executable: /bin/bash
 
     - name: Ensure target directory exists on ESXi server
-      ansible.builtin.command:
-        cmd: >
-          ssh root@192.168.20.10 "mkdir -p /vmfs/volumes/Datastore/Ansible/Cloud"
-        warn: false
+      ansible.builtin.shell:
+        cmd: ssh root@192.168.20.10 "mkdir -p /vmfs/volumes/Datastore/Ansible/Cloud"
+      args:
+        executable: /bin/bash
 
     - name: Transfer Cloud-Init ISO to ESXi server
-      ansible.builtin.command:
-        cmd: >
-          scp "{{ iso_path }}" root@192.168.20.10:"{{ esxi_iso_path }}"
+      ansible.builtin.shell:
+        cmd: scp "{{ iso_path }}" root@192.168.20.10:"{{ esxi_iso_path }}"
+      args:
+        executable: /bin/bash
 
     - name: Verify Cloud-Init ISO on ESXi server
-      ansible.builtin.command:
-        cmd: >
-          ssh root@192.168.20.10 "ls -l {{ esxi_iso_path }}"
+      ansible.builtin.shell:
+        cmd: ssh root@192.168.20.10 "ls -l {{ esxi_iso_path }}"
       register: verification_result
+      args:
+        executable: /bin/bash
 
     - name: Display verification result
       ansible.builtin.debug:
