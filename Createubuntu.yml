@@ -109,7 +109,7 @@
 
     - name: Wait for the VM to boot up and complete installation
       wait_for:
-        timeout: 600
+        timeout: 30
       delegate_to: localhost
 
     - name: Detach Ubuntu ISO after first boot
