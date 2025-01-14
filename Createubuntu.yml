@@ -1,37 +1,31 @@
-- name: Create a VM with Static IP
+- name: Simulate VM Creation
   hosts: localhost
   gather_facts: false
+  vars:
+    vm_name: "AnsibleDeployedMachine10Test"
+    user_data_path: "/home/gruppe2/AnsibleDeployments/user-data"
+    meta_data_path: "/home/gruppe2/AnsibleDeployments/meta-data"
+    iso_path: "/home/gruppe2/AnsibleDeployments/cloud-init.iso"
+    esxi_iso_path: "[Datastore] Ansible/Cloud/cloud-init.iso"
 
   tasks:
-    - name: Create the VM
-      community.vmware.vmware_guest:
-        hostname: "192.168.20.10"
-        username: "root"
-        password: "Datait2024!"
-        validate_certs: no
-        folder: "/"
-        name: "AnsibleDeployedMachine10"
-        state: "present"
-        guest_id: "ubuntu64Guest"
-        disk:
-          - size_gb: "30"
-            type: "thin"
-            datastore: "DataStore"
-        hardware:
-          memory_mb: 4000
-          num_cpus: 2
-        networks:
-          - name: "VM Network"
-            type: "static"
-            ip: "192.168.20.80"
-            netmask: "255.255.255.0"
-            gateway: "192.168.20.1"
-            dns_servers:
-              - "192.168.20.20"
-            start_connected: true
-        cdrom:
-          - controller_number: 0
-            unit_number: 0
-            state: "present"
-            type: "iso"
-            iso_path: "[DataStore] ISO/ubuntu-24.04.1-live-server-amd64.iso"
+    - name: Generate meta-data file dynamically
+      copy:
+        dest: "{{ meta_data_path }}"
+        content: |
+          instance-id: "{{ vm_name }}"
+          local-hostname: "{{ vm_name }}"
+
+    - name: Create Cloud-Init ISO
+      ansible.builtin.command:
+        cmd: >
+          genisoimage -output "{{ iso_path }}"
+          -volid cidata -joliet -rock
+          "{{ user_data_path }}" "{{ meta_data_path }}"
+
+    - name: Simulate moving Cloud-Init ISO to ESXi server
+      ansible.builtin.debug:
+        msg: >
+          Simulating copy of "{{ iso_path }}"
+          to ESXi server at "{{ esxi_iso_path }}"
+
